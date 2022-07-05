@@ -33,24 +33,28 @@ class lru_cache {
     using list_t = std::list<Item>;
     using lru_hash = std::unordered_map<ItemId, typename list_t::iterator>;
     using lru_iter = typename list_t::iterator;
-    using const_iter_t = typename list_t::const_iterator;
+    using lru_const_iter = typename list_t::const_iterator;
     using data_cb_t = std::function<ItemValue(ItemId)>;
 
-    lru_cache(size_t size, data_cb_t data_cb = default_data_cb()) : size_(size), data_cb_(data_cb) {
+    lru_cache(size_t capacity, data_cb_t data_cb = default_data_cb()) : capacity_(capacity), data_cb_(data_cb) {
     }
 
     bool full() {
-        return list_.size() >= size_;
+        return list_.size() >= capacity_;
     }
 
-    const lru_iter tail() {
-        assert(("cache is empty", list_.size() > 0));
-        return list_.end();
+    size_t size() {
+        return list_.size();
     }
 
-    const lru_iter front() {
+    const Item & tail() {
         assert(("cache is empty", list_.size() > 0));
-        return list_.begin();
+        return list_.back();
+    }
+
+    const Item & front() {
+        assert(("cache is empty", list_.size() > 0));
+        return list_.front();
     }
 
     bool contains(ItemId key) {
@@ -84,7 +88,7 @@ class lru_cache {
         }, std::placeholders::_1);
     }
 
- private:
+ protected:
     Item create_item(ItemId id) {
         if constexpr(with_value)
             return Item{id, data_cb_(id)};
@@ -95,31 +99,31 @@ class lru_cache {
  protected:
     list_t list_;
     lru_hash hash_;
-    size_t   size_;
+    size_t   capacity_;
     data_cb_t data_cb_;
 };
 
-template <class Item, class KeyT = int>
-class lru_cache_ext : public lru_cache<Item, KeyT> {
+template <class Item, class KeyT = int, bool with_value = true>
+class lru_cache_ext : public lru_cache<Item, KeyT, with_value> {
  public:
-    using _base = lru_cache<Item, KeyT>;
+    using _base = lru_cache<Item, KeyT, with_value>;
     using _base::list_;
     using _base::hash_;
-    using _base::size_;
+    using _base::capacity_;
     using typename _base::data_cb_t;
     using _base::contains;
 
     lru_cache_ext(size_t size, typename _base::data_cb_t data_cb = _base::default_data_cb())
-        : lru_cache<Item, KeyT>(size, data_cb) {
+        : _base(size, data_cb) {
     }
 
-    bool push_front(KeyT key) {
+    void push_front(KeyT key) {
         if (contains(key))
-            return true;
+            return;
 
-        list_.push_front(data_cb_(key));
+        list_.push_front(_base::create_item(key));
         hash_[key] = list_.begin();
-        if (list_.size() > size_) {
+        if (list_.size() > capacity_) {
             hash_.erase(list_.back().id);
             list_.pop_back();
         }
@@ -135,6 +139,13 @@ class lru_cache_ext : public lru_cache<Item, KeyT> {
         hash_.erase(hit_it);
 
         return true;
+    }
+
+    void erase_tail() {
+        assert(("cache is empty", list_.size() > 0));
+
+        hash_.erase(list_.back().id);
+        list_.pop_back();
     }
 };
 

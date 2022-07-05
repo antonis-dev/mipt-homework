@@ -63,7 +63,7 @@ class predicting_cache {
 
  private:
     /**
-     * @brief - it never be called for empty cache, so cur_ind_ will be at lease size_
+     * @brief - it never be called for empty cache, so cur_ind_ will be at lease cap_
      */
     void remove_worthless() {
         ItemId latest = *list_.begin();
