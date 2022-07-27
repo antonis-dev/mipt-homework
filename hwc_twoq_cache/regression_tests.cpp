@@ -23,7 +23,7 @@ const String DATA_PATH = "test_data/";
 const String IN_EXT = ".dat";
 const String ANS_EXT = ".ans";
 const String PERF_EXT = ".perf";
-const size_t IDEAL_CACHE_LIMIT = 1000;
+const size_t IDEAL_CACHE_LIMIT = 5000;
 
 std::vector<size_t>  in_ids;
 size_t               cache_size;
@@ -71,10 +71,10 @@ String percetage_diffs(size_t base_hits, size_t other_hits) {
     } else if (other_hits == 0) {
         return "no hits";
     } else if (other_hits >= base_hits) {
-        auto res = static_cast<size_t>((static_cast<double>(other_hits) / base_hits - 1) * 100);
+        auto res = ((static_cast<double>(other_hits) / base_hits - 1) * 100);
         return "+" + std::to_string(res) + String("%");
     } else {
-        auto res = static_cast<size_t>((static_cast<double>(base_hits) / other_hits - 1) * 100);
+        auto res = ((static_cast<double>(base_hits) / other_hits - 1) * 100);
         return "-" + std::to_string(res) + String("%");
     }
 }
@@ -115,7 +115,7 @@ bool performance_test(const String & test_name) {
     }
 
     size_t predict_hit_count = 0;
-    if (cache_size < IDEAL_CACHE_LIMIT) {
+    if (in_ids.size() <= IDEAL_CACHE_LIMIT) {
         predict_hit_count = 0;
         predicting_cache<size_t> predicting(cache_size, in_ids);
         for (auto id : in_ids) {
@@ -132,7 +132,7 @@ bool performance_test(const String & test_name) {
     }
 
     std::cout << "\tLRU cache hits: " << lru_hit_count << "\t\t 100% " << std::endl;
-    if (cache_size < IDEAL_CACHE_LIMIT)
+    if (in_ids.size() <= IDEAL_CACHE_LIMIT)
         std::cout << "\tPredicting cache hits: " << predict_hit_count << "\t " <<
                   percetage_diffs(lru_hit_count, predict_hit_count) << std::endl;
     std::cout << "\t2Q cache hits: " << twoq_hit_count << "\t\t " <<
