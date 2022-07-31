@@ -82,6 +82,37 @@ class lru_cache {
         return true;
     }
 
+    void push_front(ItemId key) {
+        if (contains(key))
+            return;
+
+        list_.push_front(create_item(key));
+        hash_[key] = list_.begin();
+        if (list_.size() > capacity_) {
+            hash_.erase(list_.back().id);
+            list_.pop_back();
+        }
+    }
+
+    bool erase(ItemId key) {
+        auto hit_it = hash_.find(key);
+        if (hit_it == hash_.end()) {
+            return false;
+        }
+
+        list_.erase(hit_it->second);
+        hash_.erase(hit_it);
+
+        return true;
+    }
+
+    void erase_tail() {
+        assert(("cache is empty", list_.size() > 0));
+
+        hash_.erase(list_.back().id);
+        list_.pop_back();
+    }
+
     static data_cb_t default_data_cb() {
         return std::bind([](ItemId key){
             return ItemValue{};
@@ -101,52 +132,6 @@ class lru_cache {
     lru_hash hash_;
     size_t   capacity_;
     data_cb_t data_cb_;
-};
-
-template <class Item, class KeyT = int, bool with_value = true>
-class lru_cache_ext : public lru_cache<Item, KeyT, with_value> {
- public:
-    using _base = lru_cache<Item, KeyT, with_value>;
-    using _base::list_;
-    using _base::hash_;
-    using _base::capacity_;
-    using typename _base::data_cb_t;
-    using _base::contains;
-
-    lru_cache_ext(size_t size, typename _base::data_cb_t data_cb = _base::default_data_cb())
-        : _base(size, data_cb) {
-    }
-
-    void push_front(KeyT key) {
-        if (contains(key))
-            return;
-
-        list_.push_front(_base::create_item(key));
-        hash_[key] = list_.begin();
-        if (list_.size() > capacity_) {
-            hash_.erase(list_.back().id);
-            list_.pop_back();
-        }
-    }
-
-    bool erase(KeyT key) {
-        auto hit_it = hash_.find(key);
-        if (hit_it == hash_.end()) {
-            return false;
-        }
-
-        list_.erase(hit_it->second);
-        hash_.erase(hit_it);
-
-        return true;
-    }
-
-    void erase_tail() {
-        assert(("cache is empty", list_.size() > 0));
-
-        hash_.erase(list_.back().id);
-        list_.pop_back();
-    }
 };
 
 }  // namespace homework

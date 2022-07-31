@@ -5,6 +5,7 @@
 // Created by antonis on 6/24/22.
 //
 
+#include <string>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -13,7 +14,6 @@
 #include "predicting_cache.h"
 
 using homework::lru_cache;
-using homework::lru_cache_ext;
 using homework::twoq_cache;
 using homework::predicting_cache;
 using String = std::string;
@@ -150,11 +150,11 @@ int main() {
     std::string path("test_data");
     for (auto &file : fs::recursive_directory_iterator(path)) {
         if (file.path().extension() == ANS_EXT) {
-            ans_test_cases.insert(file.path().stem());
+            ans_test_cases.insert(file.path().stem().string());
         } else if (file.path().extension() == IN_EXT) {
-            in_test_cases.insert(file.path().stem());
+            in_test_cases.insert(file.path().stem().string());
         } else if (file.path().extension() == PERF_EXT) {
-            perf_test_cases.insert(file.path().stem());
+            perf_test_cases.insert(file.path().stem().string());
         }
     }
 
