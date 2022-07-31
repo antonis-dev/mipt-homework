@@ -2,6 +2,9 @@ cmake_minimum_required( VERSION 3.0 )
 
 project( tests CXX )
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED 17)
+
 OPTION(WITH_EXTRA_TESTS "build also module tests and others" OFF)
 
 include_directories(${CATCH_HEADER_DIR})
@@ -49,7 +52,7 @@ include(Catch.cmake)
 foreach( name ${TARGETS_ALL} )
     target_include_directories( ${name} PRIVATE ${CATCH_HEADER_DIR} ${CATCH_DIR} )
     target_compile_options(${name} PRIVATE ${CXX_WARNING_FLAGS})
-    target_link_libraries(${name} ar pthread)
+    # target_link_libraries(${name} pthread)
 endforeach()
 
 foreach( name ${TARGETS_ALL} )

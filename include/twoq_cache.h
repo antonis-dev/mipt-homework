@@ -71,9 +71,9 @@ class twoq_cache {
     size_t a1_out_cap_;
     size_t am_cap_;
 
-    lru_cache_ext<ItemValue, ItemId> a1_in_;
-    lru_cache_ext<ItemValue, ItemId, false> a1_out_;
-    lru_cache_ext<ItemValue, ItemId> am_;
+    lru_cache<ItemValue, ItemId> a1_in_;
+    lru_cache<ItemValue, ItemId, false> a1_out_;
+    lru_cache<ItemValue, ItemId> am_;
 };
 
 }  // namespace homework
