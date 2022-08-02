@@ -5,7 +5,6 @@
 #ifndef INCLUDE_PREDICTING_CACHE_H_
 #define INCLUDE_PREDICTING_CACHE_H_
 
-#include <assert.h>
 #include <vector>
 #include <list>
 #include <functional>
@@ -27,21 +26,19 @@ class predicting_cache {
     predicting_cache(size_t size, history_t history) : size_(size), history_(history), cur_ind_(0) {
     }
 
-    bool full() {
+    bool full() const {
         return list_.size() >= size_;
     }
 
-    const_iter_t tail() {
-        assert(("cache is empty", list_.size() > 0));
+    const_iter_t tail() const {
         return list_.end();
     }
 
-    const_iter_t front() {
-        assert(("cache is empty", list_.size() > 0));
+    const_iter_t front() const {
         return list_.begin();
     }
 
-    bool contains(ItemId key) {
+    bool contains(ItemId key) const {
         return hash_.count(key) > 0;
     }
 

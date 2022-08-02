@@ -5,7 +5,6 @@
 #ifndef INCLUDE_LRU_CACHE_H_
 #define INCLUDE_LRU_CACHE_H_
 
-#include <assert.h>
 #include <functional>
 #include <unordered_map>
 
@@ -39,25 +38,23 @@ class lru_cache {
     lru_cache(size_t capacity, data_cb_t data_cb = default_data_cb()) : capacity_(capacity), data_cb_(data_cb) {
     }
 
-    bool full() {
+    bool full() const {
         return list_.size() >= capacity_;
     }
 
-    size_t size() {
+    size_t size() const {
         return list_.size();
     }
 
-    const Item & tail() {
-        assert(("cache is empty", list_.size() > 0));
+    const Item & tail() const {
         return list_.back();
     }
 
-    const Item & front() {
-        assert(("cache is empty", list_.size() > 0));
+    const Item & front() const {
         return list_.front();
     }
 
-    bool contains(ItemId key) {
+    bool contains(ItemId key) const {
         return hash_.count(key) > 0;
     }
 
@@ -107,20 +104,18 @@ class lru_cache {
     }
 
     void erase_tail() {
-        assert(("cache is empty", list_.size() > 0));
-
         hash_.erase(list_.back().id);
         list_.pop_back();
     }
 
     static data_cb_t default_data_cb() {
-        return std::bind([](ItemId key){
+        return [](ItemId key){
             return ItemValue{};
-        }, std::placeholders::_1);
+        };
     }
 
  protected:
-    Item create_item(ItemId id) {
+    Item create_item(ItemId id) const {
         if constexpr(with_value)
             return Item{id, data_cb_(id)};
         else
